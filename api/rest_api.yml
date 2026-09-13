@@ -1,0 +1,600 @@
+openapi: 3.2.0
+info:
+  title: Swagger TravelBlog - OpenAPI 3.2
+  description: |-
+    This is a sample TravelBlog Server based on the OpenAPI 3.2 specification. You can find out more about
+    Swagger at [https://swagger.io](https://swagger.io).
+  version: 1.0.13
+tags:
+  - name: posts
+  - name: feeds
+  - name: users
+  - name: places
+paths:
+  /posts:
+    post:
+      tags:
+        - posts
+      summary: Creates a new post
+      operationId: postsCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreateRequestDto'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostCreateResponseDto'
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: Geo not found
+        '422':
+          description: Validation exception
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - posts_auth:
+            - write:posts
+  /posts/{postId}:
+    get:
+      tags:
+        - posts
+      summary: Gets a specific post
+      operationId: postsGet
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostGetResponseVm'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - posts
+      summary: Deletes a specific post
+      operationId: postsDelete
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: Post not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - posts_auth:
+            - write:posts
+  /posts/reactions/{postId}:
+    post:
+      tags:
+        - posts
+      summary: Reacts the post
+      operationId: postsReact
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostReactRequestDto'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: Post not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - posts_auth:
+            - write:posts
+    delete:
+      tags:
+        - posts
+      summary: Deletes a reaction to the post
+      operationId: postsUnreact
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: Post not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - posts_auth:
+            - write:posts
+  /posts/comments/{postId}:
+    post:
+      tags:
+        - posts
+      summary: Posts comment to the post
+      operationId: postsComment
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCommentRequestDto'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: Post not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - posts_auth:
+            - write:posts
+    delete:
+      tags:
+        - posts
+      summary: Deletes a comment to the post
+      operationId: postsDelComment
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: commentId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: Comment not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - posts_auth:
+            - write:posts
+  /feeds/all:
+    get:
+      tags:
+        - feeds
+      summary: Get recent posts from w/o authorization
+      operationId: feedAll
+      parameters:
+        - name: lastPost
+          in: query
+          description: The last seen post for cursor pagination
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedResponseVm'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /feeds/user:
+    get:
+      tags:
+        - feeds
+      summary: Gets feed for by user interests
+      operationId: feedUser
+      parameters:
+        - name: lastPost
+          in: query
+          description: The last seen post for cursor pagination
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedResponseVm'
+        '403':
+          description: Unauthorized to action
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - posts_auth:
+            - read:posts
+  /feeds/place:
+    get:
+      tags:
+        - feeds
+      summary: Get recent posts from specific place
+      operationId: feedPlace
+      parameters:
+        - name: geoId
+          in: query
+          description: place to check posts
+          required: true
+          schema:
+            type: integer
+        - name: lastPost
+          in: query
+          description: The last seen post for cursor pagination
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedResponseVm'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/subscriptions/{userId}:
+    get:
+      tags:
+        - users
+      summary: Gets user subscriptions
+      operationId: usersSubscriptionsGet
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSubscriptionsResponseVm'
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: User not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - posts_auth:
+            - write:posts
+  /users/subscriptions/other/{userId}:
+    post:
+      tags:
+        - users
+      summary: Subscribe to user
+      operationId: usersSubscriptionsNew
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: User not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - posts_auth:
+            - write:posts
+    delete:
+      tags:
+        - users
+      summary: Usubscribe from user
+      operationId: usersSubscriptionsDelete
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: User not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - posts_auth:
+            - write:posts
+  /places:
+    get:
+      tags:
+        - places
+      summary: Gets places started with {placeName}
+      operationId: placesSearch
+      parameters:
+        - name: placeName
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        userId:
+          type: integer
+        userName:
+          type: string
+      xml:
+        name: User
+    Reaction:
+      type: string
+      enum:
+        - like
+      xml:
+        name: Reaction
+    PostCreateRequestDto:
+      type: object
+      properties:
+        description:
+          type: string
+        geoId:
+          type: integer
+        pictures:
+          type: array
+          items:
+            type: string
+            format: binary
+      xml:
+        name: PostCreateRequestDto
+    PostCreateResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+      xml:
+        name: PostCreateResponseDto
+    PostGetCommentResponseVm:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        content:
+          type: string
+      xml:
+        name: PostGetCommentResponseVm
+    PostGetResponseVm:
+      type: object
+      properties:
+        comments:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/PostGetCommentResponseVm'
+        author:
+          $ref: '#/components/schemas/User'
+        desctipion:
+          type: string
+        geoId:
+          type: integer
+        geoName:
+          type: string
+        pictures:
+          type: array
+          items:
+            type: string
+            format: binary
+        reactions:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/PostReactionVm'
+      xml:
+        name: PostGetResponseVm
+    PostReactRequestDto:
+      type: object
+      properties:
+        reaction:
+          $ref: '#/components/schemas/Reaction'
+      xml:
+        name: PostReactRequestDto
+    PostCommentRequestDto:
+      type: object
+      properties:
+        content:
+          type: string
+      xml:
+        name: PostCommentRequestDto
+    PostReactionVm:
+      type: object
+      properties:
+        reaction:
+          $ref: '#/components/schemas/Reaction'
+        count:
+          type: integer
+      xml:
+        name: PostReactionVm
+    FeedPostResponseVm:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        desctipion:
+          type: string
+        geoId:
+          type: integer
+        geoName:
+          type: string
+        picture:
+          type: string
+          format: binary
+        reactions:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/PostReactionVm'
+      xml:
+        name: FeedPostResponseVm
+    FeedResponseVm:
+      type: object
+      properties:
+        feedType:
+          type: string
+          enum:
+            - all
+            - user
+            - place
+        posts:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/FeedPostResponseVm'
+      xml:
+        name: FeedResponseVm
+    UserSubscriptionsResponseVm:
+      type: object
+      properties:
+        type: array
+        xml:
+          wrapped: true
+        items:
+          $ref: '#/components/schemas/User'
+      xml:
+        name: UserSubscriptionsResponseVm
+    UserSubscribeRequestDto:
+      type: object
+      properties:
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+  securitySchemes:
+    petstore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://travelblog.swagger.io/oauth/authorize
+          scopes:
+            "write:pets": modify posts, comments and reactions in your account
+            "read:pets": read your feed
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
