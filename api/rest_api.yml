@@ -7,11 +7,51 @@ info:
   version: 1.0.13
 tags:
   - name: posts
-  - name: feeds
   - name: users
   - name: places
 paths:
   /posts:
+    get:
+      tags:
+        - posts
+      summary: Gets posts list for user by interests
+      operationId: postsList
+      parameters:
+        - name: lastPost
+          in: query
+          description: The last seen post for cursor pagination
+          required: false
+          schema:
+            type: string
+        - name: typeOfPosts
+          in: query
+          description: The type of posts to get
+          required: true
+          schema:
+            type: string
+            enum:
+              - places
+              - subs
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostsListResponseVm'
+        '403':
+          description: Unauthorized to action
+        '500':
+          description: Server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - travelblog_auth:
+            - read:travelblog
     post:
       tags:
         - posts
@@ -36,6 +76,8 @@ paths:
           description: Geo not found
         '422':
           description: Validation exception
+        '500':
+          description: Server error
         default:
           description: Unexpected error
           content:
@@ -43,8 +85,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       security:
-        - posts_auth:
-            - write:posts
+        - travelblog_auth:
+            - write:travelblog
   /posts/{postId}:
     get:
       tags:
@@ -64,6 +106,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PostGetResponseVm'
+        '500':
+          description: Server error
         default:
           description: Unexpected error
           content:
@@ -88,6 +132,8 @@ paths:
           description: Unauthorized to action
         '404':
           description: Post not found
+        '500':
+          description: Server error
         default:
           description: Unexpected error
           content:
@@ -95,9 +141,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       security:
-        - posts_auth:
-            - write:posts
-  /posts/reactions/{postId}:
+        - travelblog_auth:
+            - write:travelblog
+  /posts/{postId}/reactions:
     post:
       tags:
         - posts
@@ -122,6 +168,8 @@ paths:
           description: Unauthorized to action
         '404':
           description: Post not found
+        '500':
+          description: Server error
         default:
           description: Unexpected error
           content:
@@ -129,8 +177,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       security:
-        - posts_auth:
-            - write:posts
+        - travelblog_auth:
+            - write:travelblog
     delete:
       tags:
         - posts
@@ -149,6 +197,8 @@ paths:
           description: Unauthorized to action
         '404':
           description: Post not found
+        '500':
+          description: Server error
         default:
           description: Unexpected error
           content:
@@ -156,9 +206,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       security:
-        - posts_auth:
-            - write:posts
-  /posts/comments/{postId}:
+        - travelblog_auth:
+            - write:travelblog
+  /posts/{postId}/comments:
     post:
       tags:
         - posts
@@ -183,6 +233,8 @@ paths:
           description: Unauthorized to action
         '404':
           description: Post not found
+        '500':
+          description: Server error
         default:
           description: Unexpected error
           content:
@@ -190,8 +242,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       security:
-        - posts_auth:
-            - write:posts
+        - travelblog_auth:
+            - write:travelblog
     delete:
       tags:
         - posts
@@ -215,6 +267,8 @@ paths:
           description: Unauthorized to action
         '404':
           description: Comment not found
+        '500':
+          description: Server error
         default:
           description: Unexpected error
           content:
@@ -222,98 +276,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       security:
-        - posts_auth:
-            - write:posts
-  /feeds/all:
-    get:
-      tags:
-        - feeds
-      summary: Get recent posts from w/o authorization
-      operationId: feedAll
-      parameters:
-        - name: lastPost
-          in: query
-          description: The last seen post for cursor pagination
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FeedResponseVm'
-        default:
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /feeds/user:
-    get:
-      tags:
-        - feeds
-      summary: Gets feed for by user interests
-      operationId: feedUser
-      parameters:
-        - name: lastPost
-          in: query
-          description: The last seen post for cursor pagination
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FeedResponseVm'
-        '403':
-          description: Unauthorized to action
-        default:
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-      security:
-        - posts_auth:
-            - read:posts
-  /feeds/place:
-    get:
-      tags:
-        - feeds
-      summary: Get recent posts from specific place
-      operationId: feedPlace
-      parameters:
-        - name: geoId
-          in: query
-          description: place to check posts
-          required: true
-          schema:
-            type: integer
-        - name: lastPost
-          in: query
-          description: The last seen post for cursor pagination
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FeedResponseVm'
-        default:
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /users/subscriptions/{userId}:
+        - travelblog_auth:
+            - write:travelblog
+  /users/{userId}/subs:
     get:
       tags:
         - users
@@ -336,6 +301,8 @@ paths:
           description: Unauthorized to action
         '404':
           description: User not found
+        '500':
+          description: Server error
         default:
           description: Unexpected error
           content:
@@ -343,9 +310,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       security:
-        - posts_auth:
-            - write:posts
-  /users/subscriptions/other/{userId}:
+        - travelblog_auth:
+            - write:travelblog
     post:
       tags:
         - users
@@ -364,6 +330,8 @@ paths:
           description: Unauthorized to action
         '404':
           description: User not found
+        '500':
+          description: Server error
         default:
           description: Unexpected error
           content:
@@ -371,8 +339,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       security:
-        - posts_auth:
-            - write:posts
+        - travelblog_auth:
+            - write:travelblog
     delete:
       tags:
         - users
@@ -391,6 +359,8 @@ paths:
           description: Unauthorized to action
         '404':
           description: User not found
+        '500':
+          description: Server error
         default:
           description: Unexpected error
           content:
@@ -398,8 +368,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       security:
-        - posts_auth:
-            - write:posts
+        - travelblog_auth:
+            - write:travelblog
   /places:
     get:
       tags:
@@ -415,12 +385,17 @@ paths:
       responses:
         '200':
           description: Successful operation
+        '500':
+          description: Server error
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      security:
+        - travelblog_auth:
+            - read:travelblog
 components:
   schemas:
     User:
@@ -522,7 +497,7 @@ components:
           type: integer
       xml:
         name: PostReactionVm
-    FeedPostResponseVm:
+    PostListItemResponseVm:
       type: object
       properties:
         user:
@@ -543,24 +518,18 @@ components:
           items:
             $ref: '#/components/schemas/PostReactionVm'
       xml:
-        name: FeedPostResponseVm
-    FeedResponseVm:
+        name: PostListItemResponseVm
+    PostsListResponseVm:
       type: object
       properties:
-        feedType:
-          type: string
-          enum:
-            - all
-            - user
-            - place
         posts:
           type: array
           xml:
             wrapped: true
           items:
-            $ref: '#/components/schemas/FeedPostResponseVm'
+            $ref: '#/components/schemas/PostListItemResponseVm'
       xml:
-        name: FeedResponseVm
+        name: PostsListResponseVm
     UserSubscriptionsResponseVm:
       type: object
       properties:
@@ -571,10 +540,6 @@ components:
           $ref: '#/components/schemas/User'
       xml:
         name: UserSubscriptionsResponseVm
-    UserSubscribeRequestDto:
-      type: object
-      properties:
-
     Error:
       type: object
       properties:
@@ -586,14 +551,14 @@ components:
         - code
         - message
   securitySchemes:
-    petstore_auth:
+    travelblog_auth:
       type: oauth2
       flows:
         implicit:
           authorizationUrl: https://travelblog.swagger.io/oauth/authorize
           scopes:
-            "write:pets": modify posts, comments and reactions in your account
-            "read:pets": read your feed
+            "write:travelblog": modify posts, comments, reactions and subs in your account
+            "read:travelblog": read posts and subs
     api_key:
       type: apiKey
       name: api_key
