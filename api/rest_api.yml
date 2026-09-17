@@ -1,0 +1,565 @@
+openapi: 3.2.0
+info:
+  title: Swagger TravelBlog - OpenAPI 3.2
+  description: |-
+    This is a sample TravelBlog Server based on the OpenAPI 3.2 specification. You can find out more about
+    Swagger at [https://swagger.io](https://swagger.io).
+  version: 1.0.13
+tags:
+  - name: posts
+  - name: users
+  - name: places
+paths:
+  /posts:
+    get:
+      tags:
+        - posts
+      summary: Gets posts list for user by interests
+      operationId: postsList
+      parameters:
+        - name: lastPost
+          in: query
+          description: The last seen post for cursor pagination
+          required: false
+          schema:
+            type: string
+        - name: typeOfPosts
+          in: query
+          description: The type of posts to get
+          required: true
+          schema:
+            type: string
+            enum:
+              - places
+              - subs
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostsListResponseVm'
+        '403':
+          description: Unauthorized to action
+        '500':
+          description: Server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - travelblog_auth:
+            - read:travelblog
+    post:
+      tags:
+        - posts
+      summary: Creates a new post
+      operationId: postsCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreateRequestDto'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostCreateResponseDto'
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: Geo not found
+        '422':
+          description: Validation exception
+        '500':
+          description: Server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - travelblog_auth:
+            - write:travelblog
+  /posts/{postId}:
+    get:
+      tags:
+        - posts
+      summary: Gets a specific post
+      operationId: postsGet
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostGetResponseVm'
+        '500':
+          description: Server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - posts
+      summary: Deletes a specific post
+      operationId: postsDelete
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: Post not found
+        '500':
+          description: Server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - travelblog_auth:
+            - write:travelblog
+  /posts/{postId}/reactions:
+    post:
+      tags:
+        - posts
+      summary: Reacts the post
+      operationId: postsReact
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostReactRequestDto'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: Post not found
+        '500':
+          description: Server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - travelblog_auth:
+            - write:travelblog
+    delete:
+      tags:
+        - posts
+      summary: Deletes a reaction to the post
+      operationId: postsUnreact
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: Post not found
+        '500':
+          description: Server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - travelblog_auth:
+            - write:travelblog
+  /posts/{postId}/comments:
+    post:
+      tags:
+        - posts
+      summary: Posts comment to the post
+      operationId: postsComment
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCommentRequestDto'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: Post not found
+        '500':
+          description: Server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - travelblog_auth:
+            - write:travelblog
+    delete:
+      tags:
+        - posts
+      summary: Deletes a comment to the post
+      operationId: postsDelComment
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: commentId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: Comment not found
+        '500':
+          description: Server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - travelblog_auth:
+            - write:travelblog
+  /users/{userId}/subs:
+    get:
+      tags:
+        - users
+      summary: Gets user subscriptions
+      operationId: usersSubscriptionsGet
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSubscriptionsResponseVm'
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - travelblog_auth:
+            - write:travelblog
+    post:
+      tags:
+        - users
+      summary: Subscribe to user
+      operationId: usersSubscriptionsNew
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - travelblog_auth:
+            - write:travelblog
+    delete:
+      tags:
+        - users
+      summary: Usubscribe from user
+      operationId: usersSubscriptionsDelete
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Unauthorized to action
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - travelblog_auth:
+            - write:travelblog
+  /places:
+    get:
+      tags:
+        - places
+      summary: Gets places started with {placeName}
+      operationId: placesSearch
+      parameters:
+        - name: placeName
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '500':
+          description: Server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - travelblog_auth:
+            - read:travelblog
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        userId:
+          type: integer
+        userName:
+          type: string
+      xml:
+        name: User
+    Reaction:
+      type: string
+      enum:
+        - like
+      xml:
+        name: Reaction
+    PostCreateRequestDto:
+      type: object
+      properties:
+        description:
+          type: string
+        geoId:
+          type: integer
+        pictures:
+          type: array
+          items:
+            type: string
+            format: binary
+      xml:
+        name: PostCreateRequestDto
+    PostCreateResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+      xml:
+        name: PostCreateResponseDto
+    PostGetCommentResponseVm:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        content:
+          type: string
+      xml:
+        name: PostGetCommentResponseVm
+    PostGetResponseVm:
+      type: object
+      properties:
+        comments:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/PostGetCommentResponseVm'
+        author:
+          $ref: '#/components/schemas/User'
+        desctipion:
+          type: string
+        geoId:
+          type: integer
+        geoName:
+          type: string
+        pictures:
+          type: array
+          items:
+            type: string
+            format: binary
+        reactions:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/PostReactionVm'
+      xml:
+        name: PostGetResponseVm
+    PostReactRequestDto:
+      type: object
+      properties:
+        reaction:
+          $ref: '#/components/schemas/Reaction'
+      xml:
+        name: PostReactRequestDto
+    PostCommentRequestDto:
+      type: object
+      properties:
+        content:
+          type: string
+      xml:
+        name: PostCommentRequestDto
+    PostReactionVm:
+      type: object
+      properties:
+        reaction:
+          $ref: '#/components/schemas/Reaction'
+        count:
+          type: integer
+      xml:
+        name: PostReactionVm
+    PostListItemResponseVm:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        desctipion:
+          type: string
+        geoId:
+          type: integer
+        geoName:
+          type: string
+        picture:
+          type: string
+          format: binary
+        reactions:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/PostReactionVm'
+      xml:
+        name: PostListItemResponseVm
+    PostsListResponseVm:
+      type: object
+      properties:
+        posts:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/PostListItemResponseVm'
+      xml:
+        name: PostsListResponseVm
+    UserSubscriptionsResponseVm:
+      type: object
+      properties:
+        type: array
+        xml:
+          wrapped: true
+        items:
+          $ref: '#/components/schemas/User'
+      xml:
+        name: UserSubscriptionsResponseVm
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+  securitySchemes:
+    travelblog_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://travelblog.swagger.io/oauth/authorize
+          scopes:
+            "write:travelblog": modify posts, comments, reactions and subs in your account
+            "read:travelblog": read posts and subs
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
