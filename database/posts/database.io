@@ -7,6 +7,7 @@ Table posts {
     place_id integer [not null, note: 'Location where post refers']
     pictures text[] [note: 'Keys for s3 storage of pictures for the post']
     created_at timestampz [not null, note: 'Creation time of the post']
+    coord point [not null, note: 'Lat/long coordinate pair for the post']
 
     indexes {
       user_id

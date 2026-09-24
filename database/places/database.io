@@ -1,4 +1,4 @@
-// mongodb
+// mongodb + redis cache
 
 Table places {
     place_id integer [primary key, note: 'Location identifier']
