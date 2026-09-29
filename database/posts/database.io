@@ -1,4 +1,4 @@
-// postgresql + cache seen on client (2 days)
+// postgresql + cache seen on client (2 days) + prepared cache
 
 Table posts {
     post_id uuid [primary key, note: 'Post identifier']
