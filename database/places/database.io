@@ -1,4 +1,4 @@
-// mongodb + elastic for fast search by name
+// mongodb + elastic для поиска по названию
 
 Table places {
     place_id integer [primary key, note: 'Location identifier']
